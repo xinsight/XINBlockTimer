@@ -11,32 +11,59 @@ Wrap the code you want to time in `+[XINBlockTimer timeBlock:]`.
 
 #import "XINBlockTimer.h"
 
+// add attributed text to a label
+
 [XINBlockTimer timeBlock:^{
 
-	// For example: time creating an attributed string with HTML //
-    NSString *html = @"<style>p {font: 12px HelveticaNeue; text-align: center;}</style><p>This is some <b>bold</b> text.</p>";
-                                     
-    NSAttributedString *text = [[NSAttributedString alloc] initWithData:[html dataUsingEncoding:NSUTF8StringEncoding]
-                                                                options:@{NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
-                                                                          NSCharacterEncodingDocumentAttribute: @(NSUTF8StringEncoding)}
-                                                                          documentAttributes:nil
-                                                                          error:nil];
-                                     
-    label2.attributedText = text;
-                
+  NSString *rawText = @"This is some bold text.";
+  
+  NSRange range = [rawText rangeOfString:@"bold"];
+  
+  NSMutableParagraphStyle *paragraphStyle = [[NSMutableParagraphStyle alloc] init];
+  paragraphStyle.alignment = NSTextAlignmentCenter;
+  
+  NSDictionary *attributes = @{NSParagraphStyleAttributeName: paragraphStyle, 
+                               NSFontAttributeName: [UIFont systemFontOfSize:fontSize]};
+  NSMutableAttributedString *text;
+  text = [[NSMutableAttributedString alloc] initWithString:rawText attributes:attributes];
+  [text addAttribute:NSFontAttributeName value:[UIFont boldSystemFontOfSize:fontSize] range:range];
+  
+  label.attributedText = text;
+
+}];
+```
+
+You can also name each block, which shows up in the output.
+
+```objc
+[XINBlockTimer timeBlock:^{
+
+  // For example: time creating an attributed string with HTML //
+  NSString *html = @"<style>p {font: 12px HelveticaNeue; text-align: center;}</style>"
+                   @"<p>This is some <b>bold</b> text.</p>";
+
+  NSDictionary *optionsDict = @{NSDocumentTypeDocumentAttribute: NSHTMLTextDocumentType,
+                                NSCharacterEncodingDocumentAttribute: @(NSUTF8StringEncoding)};
+  NSAttributedString *text = [[NSAttributedString alloc] initWithData:[html dataUsingEncoding:NSUTF8StringEncoding]
+                                                                options:optionsDict
+                                                     documentAttributes:nil
+                                                                  error:nil];
+  
+  label2.attributedText = text;
+
 } withName:@"attributed string from HTML"];
 ```
 
 Output via `NSLog`:
 
 ```
+XINBlockTimer: 0.000381 sec
 attributed string from HTML: 0.174494 sec
 ```
 
-If you track the returned `NSTimeInterval`, you can pass them to a reporting method that summarizes your findings.
+If you keep the returned `NSTimeInterval`s, you can pass them to a reporting method that summarizes your findings.
 
 ```objc
-
 
 NSTimeInterval t1 = [XINBlockTimer timeBlock:^{ ... }];
 NSTimeInterval t2 = [XINBlockTimer timeBlock:^{ ... }];
@@ -47,7 +74,10 @@ NSTimeInterval t2 = [XINBlockTimer timeBlock:^{ ... }];
 Sample Output:
 
 ```
-First interval is 100.520548x faster
+First interval is 457.989501x faster
+```
+
+```
 Difference between intervals is insignificant: 0.000002
 ```
 
