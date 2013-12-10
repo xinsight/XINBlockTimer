@@ -11,7 +11,7 @@ Wrap the code you want to time in `+[XINBlockTimer timeBlock:]`.
 
 #import "XINBlockTimer.h"
 
-// add attributed text to a label
+// manually build an attributed string
 
 [XINBlockTimer timeBlock:^{
 
